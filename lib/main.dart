@@ -1,27 +1,34 @@
 import 'package:flutter/material.dart';
 import 'dart:math';
+import 'package:audioplayers/audioplayers.dart';
 
 void main() {
-  runApp(BassTrainerApp());
+  runApp(const BassTrainerApp());
 }
 
 class BassTrainerApp extends StatelessWidget {
+  const BassTrainerApp({super.key});
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Bass Scales Trainer',
+      title: "Bass Scales Trainer",
       theme: ThemeData.dark(),
-      home: BassTrainerHome(),
+      home: const BassTrainerHome(),
     );
   }
 }
 
 class BassTrainerHome extends StatefulWidget {
+  const BassTrainerHome({super.key});
+
   @override
-  _BassTrainerHomeState createState() => _BassTrainerHomeState();
+  BassTrainerHomeState createState() => BassTrainerHomeState();
 }
 
-class _BassTrainerHomeState extends State<BassTrainerHome> {
+class BassTrainerHomeState extends State<BassTrainerHome> {
+  final AudioPlayer _player = AudioPlayer();
+
   final Map<String, List<String>> scales = {
     "Major": ["Root", "Whole", "Whole", "Half", "Whole", "Whole", "Whole", "Half"],
     "Minor": ["Root", "Whole", "Half", "Whole", "Whole", "Half", "Whole", "Whole"],
@@ -37,11 +44,13 @@ class _BassTrainerHomeState extends State<BassTrainerHome> {
   };
 
   String selectedScale = "Major";
-  String selectedRoot = "E";
+  String selectedRoot = "E1";
   String selectedString = "E";
 
   List<String> get stringOptions => fretboard.keys.toList();
-  List<String> get rootOptions => fretboard["E"]!.toSet().toList()..sort((a, b) => a.compareTo(b));
+  List<String> get rootOptions => [
+    "E1", "F", "F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E2"
+  ];
   List<String> get scaleOptions => scales.keys.toList();
 
   final List<String> tips = [
@@ -55,11 +64,21 @@ class _BassTrainerHomeState extends State<BassTrainerHome> {
 
   String get randomTip => tips[Random().nextInt(tips.length)];
 
+  void playNote(String filename) async {
+    final path = "sounds/$filename";
+    print("Trying to play: assets/$path");
+    try {
+      await _player.play(AssetSource(path));
+    } catch (e) {
+      print("Error playing $path: $e");
+    }
+  }
+
   void showScaleInfo(BuildContext context) {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text("Scale Info"),
+        title: const Text("Scale Info"),
         content: Text("You selected the $selectedRoot $selectedScale scale."),
       ),
     );
@@ -71,7 +90,7 @@ class _BassTrainerHomeState extends State<BassTrainerHome> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text("${selectedString} String Notes"),
+        title: Text("$selectedString String Notes"),
         content: Text(display),
       ),
     );
@@ -87,7 +106,7 @@ class _BassTrainerHomeState extends State<BassTrainerHome> {
     showDialog(
       context: context,
       builder: (_) => AlertDialog(
-        title: Text("Challenge"),
+        title: const Text("Challenge"),
         content: Text("Try the $selectedRoot $selectedScale scale on $selectedString string!"),
       ),
     );
@@ -98,15 +117,15 @@ class _BassTrainerHomeState extends State<BassTrainerHome> {
     return Scaffold(
       backgroundColor: Colors.black,
       appBar: AppBar(
-        title: Text("Bass Scales Trainer"),
+        title: const Text("Bass Scales Trainer"),
       ),
       body: Padding(
         padding: const EdgeInsets.all(16.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            Text("🎸 Tip: $randomTip", style: TextStyle(color: Colors.grey)),
-            SizedBox(height: 20),
+            Text("🎸 Tip: $randomTip", style: const TextStyle(color: Colors.grey)),
+            const SizedBox(height: 20),
             DropdownButton<String>(
               value: selectedScale,
               onChanged: (val) => setState(() => selectedScale = val!),
@@ -125,21 +144,25 @@ class _BassTrainerHomeState extends State<BassTrainerHome> {
               items: stringOptions.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
               dropdownColor: Colors.grey[900],
             ),
-            SizedBox(height: 20),
+            const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => showScaleInfo(context),
-              child: Text("Show Scale Info"),
+              child: const Text("Show Scale Info"),
             ),
             ElevatedButton(
               onPressed: () => showFretboard(context),
-              child: Text("Show Selected String Notes"),
+              child: const Text("Show Selected String Notes"),
             ),
             ElevatedButton(
               onPressed: () => showDailyChallenge(context),
-              child: Text("Random Challenge"),
+              child: const Text("Random Challenge"),
             ),
-            Spacer(),
-            Center(
+            ElevatedButton(
+              onPressed: () => playNote("a0.mp3"),
+              child: const Text("Play A0 Note"),
+            ),
+            const Spacer(),
+            const Center(
               child: Text("Learn with your ears, play with your soul.", style: TextStyle(color: Colors.grey)),
             )
           ],
