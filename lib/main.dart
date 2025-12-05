@@ -46,11 +46,12 @@ class BassTrainerHomeState extends State<BassTrainerHome> {
   String selectedScale = "Major";
   String selectedRoot = "E1";
   String selectedString = "E";
+  int selectedFret = 0;
 
   List<String> get stringOptions => fretboard.keys.toList();
   List<String> get rootOptions => [
-    "E1", "F", "F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E2"
-  ];
+        "E1", "F", "F#", "G", "G#", "A", "A#", "B", "C", "C#", "D", "D#", "E2"
+      ];
   List<String> get scaleOptions => scales.keys.toList();
 
   final List<String> tips = [
@@ -102,6 +103,7 @@ class BassTrainerHomeState extends State<BassTrainerHome> {
       selectedScale = scaleOptions[rand.nextInt(scaleOptions.length)];
       selectedRoot = rootOptions[rand.nextInt(rootOptions.length)];
       selectedString = stringOptions[rand.nextInt(stringOptions.length)];
+      selectedFret = rand.nextInt(13);
     });
     showDialog(
       context: context,
@@ -144,6 +146,12 @@ class BassTrainerHomeState extends State<BassTrainerHome> {
               items: stringOptions.map((s) => DropdownMenuItem(value: s, child: Text(s))).toList(),
               dropdownColor: Colors.grey[900],
             ),
+            DropdownButton<int>(
+              value: selectedFret,
+              onChanged: (val) => setState(() => selectedFret = val!),
+              items: List.generate(13, (i) => DropdownMenuItem(value: i, child: Text("Fret $i"))),
+              dropdownColor: Colors.grey[900],
+            ),
             const SizedBox(height: 20),
             ElevatedButton(
               onPressed: () => showScaleInfo(context),
@@ -158,8 +166,8 @@ class BassTrainerHomeState extends State<BassTrainerHome> {
               child: const Text("Random Challenge"),
             ),
             ElevatedButton(
-              onPressed: () => playNote("a0.mp3"),
-              child: const Text("Play A0 Note"),
+              onPressed: () => playNote("${selectedString.toLowerCase()}$selectedFret.mp3"),
+              child: const Text("Play Selected Note"),
             ),
             const Spacer(),
             const Center(
